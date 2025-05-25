@@ -1,3 +1,4 @@
+/* Base App Styles */
 .App {
   text-align: center;
 }
@@ -28,6 +29,7 @@
   color: #61dafb;
 }
 
+/* App Logo Animation */
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +37,98 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Dark Mode */
+body.dark-mode {
+  background-color: #121212;
+  color: #fff;
+}
+
+.dark-mode .card {
+  background-color: #1e1e1e;
+  color: white;
+}
+
+/* Track Card Animation */
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.track-card {
+  animation: fadeSlideIn 0.6s ease-in-out;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+/* Card Hover Animation */
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Grid / List Toggle Styles */
+.grid-view .track-card {
+  width: 100%;
+}
+
+.list-view .track-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.list-view .track-card .card-img-top {
+  width: 100px;
+  height: auto;
+  margin-right: 20px;
+}
+
+/* Button Hover Effect */
+.btn-outline-dark:hover,
+.btn-outline-secondary:hover {
+  background-color: #333;
+  color: #fff;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+/* Modal Animation */
+.modal.show .modal-dialog {
+  transform: translateY(-50px);
+  opacity: 0;
+  animation: modalFadeDown 0.5s forwards;
+}
+
+@keyframes modalFadeDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Optional: Floating Music Wave Icon 🎵 */
+.music-wave {
+  animation: pulse 1s infinite;
+  font-size: 1.5rem;
+  color: #ff4081;
+  margin-top: 8px;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Optional: Smooth Search Focus */
+input[type="search"]:focus {
+  width: 100%;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
+  transition: all 0.3s ease;
 }

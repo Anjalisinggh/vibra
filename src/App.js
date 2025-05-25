@@ -1,5 +1,5 @@
 import './App.css';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function App() {
   const [tracks, setTracks] = useState([]);
@@ -7,7 +7,14 @@ function App() {
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [isGrid, setIsGrid] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+
   const audioRefs = useRef({});
+
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+  }, [darkMode]);
 
   const fetchTracks = async (query = 'arjit') => {
     try {
@@ -48,56 +55,49 @@ function App() {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+      <nav className={`navbar navbar-expand-lg ${darkMode ? 'bg-dark navbar-dark' : 'bg-light'}`}>
         <div className="container-fluid">
           <a className="navbar-brand" href="#">Vibra</a>
-          <button
-            className="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon" />
-          </button>
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <form className="d-flex py-2 w-100" role="search" onSubmit={handleSearchSubmit}>
-              <input
-                className="form-control me-2"
-                type="search"
-                placeholder="Search"
-                aria-label="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button className="btn btn-outline-success" type="submit">
-                Search
-              </button>
-            </form>
+          <div className="d-flex align-items-center gap-2 ms-auto">
+            <button className="btn btn-outline-secondary" onClick={() => setIsGrid(!isGrid)}>
+              {isGrid ? 'List View' : 'Grid View'}
+            </button>
+            <button className="btn btn-outline-secondary" onClick={() => setDarkMode(!darkMode)}>
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
+            </button>
           </div>
         </div>
       </nav>
 
-      <div className="container-fluid mt-4">
-        <button className="btn btn-primary mb-4" onClick={() => fetchTracks()}>
+      <div className="container mt-4">
+        <form className="d-flex mb-3" onSubmit={handleSearchSubmit}>
+          <input
+            className="form-control me-2"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button className="btn btn-primary" type="submit">Search</button>
+        </form>
+
+        <button className="btn btn-success mb-4" onClick={() => fetchTracks()}>
           Get My Top Tracks
         </button>
 
-        <div className="row">
+        <div className={`row ${isGrid ? 'grid-view' : 'list-view'}`}>
           {tracks.map((track) => (
-            <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4" key={track.id}>
-              <div className="card h-100 shadow-sm" style={{ borderRadius: '12px' }}>
+            <div className={`col-md-${isGrid ? 4 : 12} mb-4`} key={track.id}>
+              <div className="card h-100 track-card p-2">
                 <img
                   src={track.album?.images?.[0]?.url}
                   className="card-img-top"
                   alt={track.name}
-                  style={{ height: '180px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
                 />
-                <div className="card-body p-3">
-                  <h5 className="card-title" style={{ fontSize: '1rem' }}>{track.name}</h5>
-                  <p className="card-text" style={{ fontSize: '0.9rem' }}>{track.artists?.[0]?.name || 'Unknown Artist'}</p>
+                <div className="card-body">
+                  <h5 className="card-title">{track.name}</h5>
+                  <p className="card-text">{track.artists?.[0]?.name || 'Unknown Artist'}</p>
                   {track.preview_url ? (
                     <audio
                       controls
@@ -109,10 +109,7 @@ function App() {
                   ) : (
                     <p className="text-muted">No preview available</p>
                   )}
-                  <button
-                    className="btn btn-outline-dark btn-sm"
-                    onClick={() => handleOpenModal(track)}
-                  >
+                  <button className="btn btn-outline-dark" onClick={() => handleOpenModal(track)}>
                     Leave Anonymous Message
                   </button>
                 </div>
@@ -123,16 +120,12 @@ function App() {
       </div>
 
       {showModal && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal show d-block" tabIndex="-1">
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Message for: {currentTrack.name}</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
+                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
               </div>
               <div className="modal-body">
                 <textarea
@@ -144,20 +137,8 @@ function App() {
                 ></textarea>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSubmitMessage}
-                >
-                  Submit
-                </button>
+                <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+                <button className="btn btn-primary" onClick={handleSubmitMessage}>Submit</button>
               </div>
             </div>
           </div>
