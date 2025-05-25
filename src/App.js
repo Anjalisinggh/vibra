@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 function App() {
   const [tracks, setTracks] = useState([]);
@@ -7,6 +7,7 @@ function App() {
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const audioRefs = useRef({});
 
   const fetchTracks = async (query = 'arjit') => {
     try {
@@ -37,6 +38,14 @@ function App() {
     setShowModal(false);
   };
 
+  const handlePlay = (id) => {
+    Object.keys(audioRefs.current).forEach((key) => {
+      if (key !== id && audioRefs.current[key]) {
+        audioRefs.current[key].pause();
+      }
+    });
+  };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -54,7 +63,7 @@ function App() {
             <span className="navbar-toggler-icon" />
           </button>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <form className="d-flex" role="search" onSubmit={handleSearchSubmit}>
+            <form className="d-flex py-2 w-100" role="search" onSubmit={handleSearchSubmit}>
               <input
                 className="form-control me-2"
                 type="search"
@@ -71,30 +80,37 @@ function App() {
         </div>
       </nav>
 
-      <div className="container mt-4">
+      <div className="container-fluid mt-4">
         <button className="btn btn-primary mb-4" onClick={() => fetchTracks()}>
           Get My Top Tracks
         </button>
 
         <div className="row">
           {tracks.map((track) => (
-            <div className="col-md-4 mb-4" key={track.id}>
-              <div className="card h-100">
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4" key={track.id}>
+              <div className="card h-100 shadow-sm" style={{ borderRadius: '12px' }}>
                 <img
                   src={track.album?.images?.[0]?.url}
                   className="card-img-top"
                   alt={track.name}
+                  style={{ height: '180px', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}
                 />
-                <div className="card-body">
-                  <h5 className="card-title">{track.name}</h5>
-                  <p className="card-text">{track.artists?.[0]?.name || 'Unknown Artist'}</p>
+                <div className="card-body p-3">
+                  <h5 className="card-title" style={{ fontSize: '1rem' }}>{track.name}</h5>
+                  <p className="card-text" style={{ fontSize: '0.9rem' }}>{track.artists?.[0]?.name || 'Unknown Artist'}</p>
                   {track.preview_url ? (
-                    <audio controls src={track.preview_url} className="w-100 mb-2" />
+                    <audio
+                      controls
+                      src={track.preview_url}
+                      className="w-100 mb-2"
+                      ref={(el) => (audioRefs.current[track.id] = el)}
+                      onPlay={() => handlePlay(track.id)}
+                    />
                   ) : (
                     <p className="text-muted">No preview available</p>
                   )}
                   <button
-                    className="btn btn-outline-dark"
+                    className="btn btn-outline-dark btn-sm"
                     onClick={() => handleOpenModal(track)}
                   >
                     Leave Anonymous Message
@@ -106,9 +122,8 @@ function App() {
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && (
-        <div className="modal show d-block" tabIndex="-1">
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
