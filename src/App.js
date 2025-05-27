@@ -42,7 +42,9 @@ function App() {
   const handleSubmitMessage = () => {
     console.log(`Anonymous message for ${currentTrack.name}: ${message}`);
     setMessage('');
+     
     setShowModal(false);
+   
   };
 
   const handlePlay = (id) => {
@@ -79,10 +81,10 @@ function App() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className="btn btn-primary" type="submit">Search</button>
+          <button className="btn btn-secondary" type="submit">Search</button>
         </form>
 
-        <button className="btn btn-success mb-4" onClick={() => fetchTracks()}>
+        <button className="btn btn-secondary mb-4" onClick={() => fetchTracks()}>
           Get My Top Tracks
         </button>
 
