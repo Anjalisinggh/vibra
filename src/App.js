@@ -9,21 +9,22 @@ function App() {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isGrid, setIsGrid] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-
   const audioRefs = useRef({});
 
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
   }, [darkMode]);
 
-  const fetchTracks = async (query = 'arjit') => {
+  useEffect(() => {
+    fetchTracks(); // Load default tracks
+  }, []);
+
+  const fetchTracks = async (query = 'arijit') => {
     try {
-      const response = await fetch(
-        `https://v1.nocodeapi.com/anjalisinggh/spotify/nBAzDKrrccuAcVSe/search?q=${query}&type=track`
-      );
-      const data = await response.json();
-      const trackItems = data?.tracks?.items || [];
-      setTracks(trackItems);
+      const res = await fetch(`https://saavn.dev/api/search/songs?query=${query}`);
+      const data = await res.json();
+      const songs = data.data?.results || [];
+      setTracks(songs);
     } catch (error) {
       console.error('Error fetching tracks:', error);
     }
@@ -42,9 +43,7 @@ function App() {
   const handleSubmitMessage = () => {
     console.log(`Anonymous message for ${currentTrack.name}: ${message}`);
     setMessage('');
-     
     setShowModal(false);
-   
   };
 
   const handlePlay = (id) => {
@@ -59,6 +58,7 @@ function App() {
     <>
       <nav className={`navbar navbar-expand-lg ${darkMode ? 'bg-dark navbar-dark' : 'bg-light'}`}>
         <div className="container-fluid">
+          <img src="/vibra-note.svg" alt="Logo" className="navbar-brand-logo" />
           <a className="navbar-brand" href="#">Vibra</a>
           <div className="d-flex align-items-center gap-2 ms-auto">
             <button className="btn btn-outline-secondary" onClick={() => setIsGrid(!isGrid)}>
@@ -76,52 +76,56 @@ function App() {
           <input
             className="form-control me-2"
             type="search"
-            placeholder="Search"
-            aria-label="Search"
+            placeholder="Search songs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="btn btn-secondary" type="submit">Search</button>
         </form>
 
-        <button className="btn btn-secondary mb-4" onClick={() => fetchTracks()}>
-          Get My Top Tracks
-        </button>
-
         <div className={`row ${isGrid ? 'grid-view' : 'list-view'}`}>
-          {tracks.map((track) => (
-            <div className={`col-md-${isGrid ? 4 : 12} mb-4`} key={track.id}>
-              <div className="card h-100 track-card p-2">
-                <img
-                  src={track.album?.images?.[0]?.url}
-                  className="card-img-top"
-                  alt={track.name}
-                />
-                <div className="card-body">
-                  <h5 className="card-title">{track.name}</h5>
-                  <p className="card-text">{track.artists?.[0]?.name || 'Unknown Artist'}</p>
-                  {track.preview_url ? (
-                    <audio
-                      controls
-                      src={track.preview_url}
-                      className="w-100 mb-2"
-                      ref={(el) => (audioRefs.current[track.id] = el)}
-                      onPlay={() => handlePlay(track.id)}
-                    />
-                  ) : (
-                    <p className="text-muted">No preview available</p>
-                  )}
-                  <button className="btn btn-outline-dark" onClick={() => handleOpenModal(track)}>
-                    Leave Anonymous Message
-                  </button>
+          {tracks.map((track, index) => {
+            const audioUrl = track.downloadUrl?.at(-1)?.url; // pick highest quality
+            const imageUrl = track.image?.[2]?.url || track.image?.[0]?.url;
+            const trackId = track.id || `track-${index}`;
+
+            return (
+              <div className={`col-md-${isGrid ? 4 : 12} mb-4`} key={trackId}>
+                <div className="card h-100 track-card p-2">
+                  <img src={imageUrl} className="card-img-top" alt={track.name} />
+                  <div className="card-body">
+                    <h5 className="card-title">{track.name}</h5>
+                    <p className="card-text">{track.primaryArtists}</p>
+                    {audioUrl ? (
+                      <audio
+                        controls
+                        src={audioUrl}
+                        className="w-100 mb-2"
+                        ref={(el) => (audioRefs.current[trackId] = el)}
+                        onPlay={() => handlePlay(trackId)}
+                      />
+                    ) : (
+                      <iframe
+                        src={`https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(track.name + ' ' + track.primaryArtists)}`}
+                        width="100%"
+                        height="200"
+                        frameBorder="0"
+                        allow="autoplay"
+                        title={track.name}
+                      />
+                    )}
+                    <button className="btn btn-outline-dark mt-2" onClick={() => handleOpenModal(track)}>
+                      Leave Anonymous Message
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {showModal && (
+      {showModal && currentTrack && (
         <div className="modal show d-block" tabIndex="-1">
           <div className="modal-dialog">
             <div className="modal-content">
