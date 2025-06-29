@@ -114,7 +114,7 @@ function App() {
                         title={track.name}
                       />
                     )}
-                    <button className="btn btn-outline-dark mt-2" onClick={() => handleOpenModal(track)}>
+                    <button className="btn btn-secondary mt-2" onClick={() => handleOpenModal(track)}>
                       Leave Anonymous Message
                     </button>
                   </div>
